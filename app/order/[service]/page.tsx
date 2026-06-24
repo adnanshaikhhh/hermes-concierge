@@ -88,6 +88,12 @@ export default async function OrderPage({
             {serviceData.description}
           </p>
 
+          {process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.startsWith("pk_test") && (
+            <div className="mb-4 rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-300">
+              Test mode — use card <span className="font-mono">4242 4242 4242 4242</span>, any future expiry, any CVC, any ZIP. No real charge.
+            </div>
+          )}
+
           {!user ? (
             <div className="rounded-xl border border-[#1e2d4a] bg-[#0e1420] p-6 text-center">
               <p className="mb-4 text-sm text-[#8b9dc3]">
