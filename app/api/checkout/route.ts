@@ -13,6 +13,14 @@ const ALLOWED_SERVICES = new Set([
 const BRIEF_MIN = 50;
 const BRIEF_MAX = 5000;
 
+const SERVICE_FALLBACK: Record<string, { name: string; description: string; price_cents: number }> = {
+  "research-brief": { name: "Research Brief", description: "Comprehensive research on any topic with key findings, data points, and actionable insights.", price_cents: 900 },
+  "copywriting": { name: "Copywriting", description: "Persuasive, conversion-focused copy for landing pages, emails, ads, or product descriptions.", price_cents: 1500 },
+  "data-analysis": { name: "Data Analysis", description: "Structured analysis of data, trends, or metrics with clear findings and visual-ready summaries.", price_cents: 1900 },
+  "strategy-report": { name: "Strategy Report", description: "In-depth strategic analysis, market assessment, or business planning document.", price_cents: 2900 },
+  "competitor-analysis": { name: "Competitor Analysis", description: "Detailed breakdown of competitors, their positioning, strengths, weaknesses, and market gaps.", price_cents: 2400 },
+};
+
 export async function POST(req: Request) {
   let payload: any;
   try {
@@ -61,15 +69,16 @@ export async function POST(req: Request) {
     );
   }
 
-  // Fetch service from DB to get authoritative price
-  const { data: service, error: svcErr } = await supabase
+  // Fetch service from DB to get authoritative price; fall back to hardcoded defaults if table is empty
+  const { data: dbService } = await supabase
     .from("services")
     .select("*")
     .eq("id", serviceId)
     .eq("active", true)
     .single();
 
-  if (svcErr || !service) {
+  const service = dbService || SERVICE_FALLBACK[serviceId];
+  if (!service) {
     return NextResponse.json({ error: "Service not found" }, { status: 404 });
   }
 
