@@ -102,7 +102,11 @@ export async function POST(req: Request) {
     .from("clients")
     .upsert({ id: user.id, email: user.email! }, { onConflict: "id" });
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const appUrl =
+    req.headers.get("origin") ||
+    (process.env.NEXT_PUBLIC_APP_URL ?? "").replace(/\/$/, "") ||
+    new URL(req.url).origin ||
+    "http://localhost:3000";
 
   try {
     const session = await stripe.checkout.sessions.create({
