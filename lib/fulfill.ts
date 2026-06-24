@@ -41,6 +41,17 @@ export async function fulfillOrder(orderId: string): Promise<FulfillResult> {
     .update({ status: processingStatus })
     .eq("id", orderId);
 
+  // 2b. Load client email (orders table has no client_email column; it lives on clients)
+  let clientEmail: string | null = null;
+  if (order.client_id) {
+    const { data: client } = await supabase
+      .from("clients")
+      .select("email")
+      .eq("id", order.client_id)
+      .single();
+    clientEmail = client?.email ?? null;
+  }
+
   try {
     // 3. Build prompts
     const template: string = order.services.prompt_template;
@@ -89,7 +100,7 @@ export async function fulfillOrder(orderId: string): Promise<FulfillResult> {
     });
 
     // 7. Email notification
-    await notifyClient(order, result.content, isRevision).catch((e) =>
+    await notifyClient(order, clientEmail, result.content, isRevision).catch((e) =>
       console.error("Email failed:", e)
     );
 
@@ -115,6 +126,7 @@ export async function fulfillOrder(orderId: string): Promise<FulfillResult> {
 
 async function notifyClient(
   order: any,
+  clientEmail: string | null,
   content: string,
   isRevision: boolean
 ) {
@@ -126,6 +138,11 @@ async function notifyClient(
     return;
   }
 
+  if (!clientEmail) {
+    console.log(`[email] no client email for order ${order.id}, skipping`);
+    return;
+  }
+
   const resend = new Resend(apiKey);
   const subject = isRevision
     ? `✅ Your revision is ready — ${order.title}`
@@ -133,7 +150,7 @@ async function notifyClient(
 
   await resend.emails.send({
     from: process.env.FROM_EMAIL || "noreply@hermesconcierge.com",
-    to: order.client_email || "client@example.com",
+    to: clientEmail,
     subject,
     html: `
       <div style="font-family: Inter, system-ui, sans-serif; max-width: 600px; margin: 0 auto; background: #080B14; color: #F0F4FF; padding: 40px; border-radius: 12px;">
