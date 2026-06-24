@@ -90,6 +90,10 @@ export default async function Home() {
             receive in minutes.{" "}
             <span className="text-[#f0f4ff]">Zero humans required.</span>
           </p>
+          <p className="mx-auto mt-4 max-w-xl text-balance text-base text-neutral-500">
+            Built for operators who would rather be doing the work than
+            coordinating the people who do the work.
+          </p>
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <a
               href="#services"
@@ -179,7 +183,9 @@ export default async function Home() {
               key={s.n}
               className="rounded-xl border border-[#1e2d4a] bg-[#0e1420] p-6"
             >
-              <div className="mb-3 font-mono text-xs text-[#3b6fe8]">{s.n}</div>
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-600/10 text-sm font-bold text-indigo-600">
+                {s.n}
+              </div>
               <h3 className="mb-2 text-base font-semibold text-[#f0f4ff]">
                 {s.t}
               </h3>
