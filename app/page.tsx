@@ -66,12 +66,19 @@ export default async function Home() {
     <div className="grid-bg">
       {/* Hero */}
       <section className="relative overflow-hidden">
-        <div className="mx-auto max-w-6xl px-6 pb-16 pt-20 sm:pt-28 lg:pt-32">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#2a4080] bg-[#0e1420] px-3 py-1 text-xs text-[#8b9dc3]">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#10b981] status-pulse" />
-            <span>Agents live · accepting orders now</span>
+        <div
+          aria-hidden
+          className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[420px] w-[820px] -translate-x-1/2 rounded-full bg-[#3b6fe8]/20 blur-3xl"
+        />
+        <div className="mx-auto max-w-6xl px-5 pb-16 pt-20 sm:px-8 sm:pt-28 lg:pt-32">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-sm font-medium text-emerald-600">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+            </span>
+            Agents live · accepting orders now
           </div>
-          <h1 className="display-heading mb-6 max-w-3xl text-[#f0f4ff]">
+          <h1 className="display-heading mb-6 max-w-3xl text-4xl font-bold tracking-tight text-[#f0f4ff] sm:text-5xl md:text-6xl">
             Your work,
             <br />
             <span className="bg-gradient-to-r from-[#3b6fe8] via-[#8b5cf6] to-[#3b6fe8] bg-clip-text text-transparent">
@@ -83,16 +90,16 @@ export default async function Home() {
             receive in minutes.{" "}
             <span className="text-[#f0f4ff]">Zero humans required.</span>
           </p>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <a
               href="#services"
-              className="inline-flex items-center gap-2 rounded-lg bg-[#3b6fe8] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#4a7ef0]"
+              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-[#3b6fe8] px-5 py-3 text-sm font-semibold text-white shadow-sm shadow-[#3b6fe8]/30 transition hover:bg-[#4a7ef0] hover:shadow-md hover:shadow-[#3b6fe8]/40 sm:w-auto"
             >
               Start a brief →
             </a>
             <a
               href="/dashboard"
-              className="inline-flex items-center gap-2 rounded-lg border border-[#2a4080] bg-[#0e1420] px-5 py-3 text-sm font-semibold text-[#f0f4ff] transition hover:border-[#3b6fe8]"
+              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-[#2a4080] bg-[#0e1420] px-5 py-3 text-sm font-semibold text-[#f0f4ff] transition hover:border-[#3b6fe8] hover:bg-[#141b2d] sm:w-auto"
             >
               View dashboard
             </a>
@@ -202,15 +209,23 @@ export default async function Home() {
 }
 
 function ServiceCardDisplay({ service }: { service: any }) {
+  const isPopular = service.id === "strategy-report";
   return (
     <a href={`/order/${service.id}`} className="block">
-      <div className="gradient-border-card h-full">
+      <div
+        className={`gradient-border-card group relative h-full transition duration-200 hover:-translate-y-1 hover:shadow-lg ${isPopular ? "border-indigo-500 ring-1 ring-indigo-500/30" : ""}`}
+      >
+        {isPopular && (
+          <span className="absolute -top-3 left-6 z-10 rounded-full bg-indigo-600 px-3 py-1 text-xs font-semibold text-white shadow">
+            Most popular
+          </span>
+        )}
         <div className="gradient-border-card-inner flex h-full flex-col">
           <div className="mb-3 flex items-start justify-between">
             <h3 className="text-lg font-semibold text-[#f0f4ff]">
               {service.name}
             </h3>
-            <span className="badge-mono rounded border border-[#2a4080] bg-[#3b6fe8]/10 px-2 py-0.5 text-[#3b6fe8]">
+            <span className="badge-mono rounded border border-[#2a4080] bg-[#3b6fe8]/10 px-2 py-0.5 text-2xl font-bold tracking-tight text-[#3b6fe8]">
               ${(service.price_cents / 100).toFixed(0)}
             </span>
           </div>
@@ -218,7 +233,7 @@ function ServiceCardDisplay({ service }: { service: any }) {
             {service.description}
           </p>
           <div className="flex items-center justify-between border-t border-[#1e2d4a] pt-4">
-            <div className="flex items-center gap-1.5 text-xs text-[#4a5980]">
+            <div className="flex items-center gap-1.5 text-sm text-neutral-500">
               <span>~{service.estimated_minutes} min delivery</span>
             </div>
             <span className="text-sm font-medium text-[#3b6fe8]">Order →</span>
