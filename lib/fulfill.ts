@@ -27,6 +27,11 @@ export async function fulfillOrder(orderId: string): Promise<FulfillResult> {
     return { success: false, status: "missing", error: "Order not found" };
   }
 
+  // Payment gate: never fulfill an initial order that has not been paid.
+  if (order.status === "pending" && !order.stripe_payment_intent_id) {
+    return { success: true, status: order.status };
+  }
+
   // Idempotency: skip if not in a state that needs fulfillment
   const isRevision = order.status === "revision_requested";
   const isInitial = order.status === "pending";
