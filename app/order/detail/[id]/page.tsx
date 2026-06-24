@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { OrderStatus } from "@/components/OrderStatus";
 import { DeliveryViewer } from "@/components/DeliveryViewer";
 import { RevisionForm } from "./RevisionForm";
+import { AutoRefresh } from "./AutoRefresh";
 import { formatDate, formatPrice } from "@/lib/utils";
 import Link from "next/link";
 import { ArrowLeft, Clock, Hash } from "lucide-react";
@@ -38,6 +39,7 @@ export default async function OrderDetailPage({
     .limit(20);
 
   const hasDelivery = !!order.fulfilled_content;
+  const isWorking = ["pending", "processing", "revision_requested", "revision_processing"].includes(order.status);
   const isComplete = order.status === "complete";
   const canRevise = isComplete && !order.revision_brief;
   const showRevision = !!order.revision_content;
@@ -51,6 +53,8 @@ export default async function OrderDetailPage({
         <ArrowLeft className="h-3 w-3" />
         Back to dashboard
       </Link>
+
+      <AutoRefresh active={isWorking} />
 
       {/* Header */}
       <div className="mb-8">
@@ -134,6 +138,13 @@ export default async function OrderDetailPage({
             )}
           </div>
           <DeliveryViewer content={order.fulfilled_content} title={order.title} />
+        </div>
+      )}
+
+      {!hasDelivery && isWorking && (
+        <div className="rounded-lg border border-[#1e2d4a] bg-[#0e1420] p-6 text-center text-sm text-[#9fb0d0]">
+          <span className="mr-2 inline-block h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
+          Your agent is preparing the deliverable… this page updates automatically.
         </div>
       )}
 
