@@ -50,3 +50,19 @@ export function statusColor(status: string) {
 export function statusLabel(status: string) {
   return status.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
+
+export type ServiceLite = {
+  id?: string;
+  name: string;
+  description: string;
+  price_cents: number;
+  estimated_minutes?: number;
+};
+
+export type CheckoutPayload = {
+  serviceId?: string;
+  title?: string;
+  brief?: string;
+  context?: string;
+  specialInstructions?: string;
+};

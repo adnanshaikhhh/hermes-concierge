@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import type { ServiceLite } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -214,7 +215,7 @@ export default async function Home() {
   );
 }
 
-function ServiceCardDisplay({ service }: { service: any }) {
+function ServiceCardDisplay({ service }: { service: ServiceLite }) {
   const isPopular = service.id === "strategy-report";
   return (
     <a href={`/order/${service.id}`} className="block">

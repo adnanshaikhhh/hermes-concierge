@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { stripe } from "@/lib/stripe";
+import type { CheckoutPayload } from "@/lib/utils";
 
 const ALLOWED_SERVICES = new Set([
   "research-brief",
@@ -22,7 +23,7 @@ const SERVICE_FALLBACK: Record<string, { name: string; description: string; pric
 };
 
 export async function POST(req: Request) {
-  let payload: any;
+  let payload: CheckoutPayload;
   try {
     payload = await req.json();
   } catch {

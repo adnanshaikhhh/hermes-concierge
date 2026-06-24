@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { OrderForm } from "./OrderForm";
+import type { ServiceLite } from "@/lib/utils";
 
 const VALID_SERVICES = new Set([
   "research-brief",
@@ -26,7 +27,7 @@ export default async function OrderPage({
   } = await supabase.auth.getUser();
 
   // Fetch service from DB, fall back to defaults
-  const DEFAULTS: Record<string, any> = {
+  const DEFAULTS: Record<string, ServiceLite> = {
     "research-brief": {
       name: "Research Brief",
       description: "Comprehensive research on any topic with key findings, data points, and actionable insights.",
