@@ -39,12 +39,20 @@ export async function fulfillOrder(orderId: string): Promise<FulfillResult> {
     return { success: true, status: order.status };
   }
 
-  // 2. Mark as processing
-  const processingStatus = isRevision ? "revision_processing" : "processing";
-  await supabase
-    .from("orders")
-    .update({ status: processingStatus })
-    .eq("id", orderId);
+  // 2. Atomically claim the order so concurrent duplicate events can't double-fulfill
+  if (isRevision) {
+    await supabase.from("orders").update({ status: "revision_processing" }).eq("id", orderId);
+  } else {
+    const { data: claimed } = await supabase
+      .from("orders")
+      .update({ status: "processing" })
+      .eq("id", orderId)
+      .eq("status", "pending")
+      .select("id");
+    if (!claimed || claimed.length === 0) {
+      return { success: true, status: "processing" }; // another worker already claimed it
+    }
+  }
 
   // 2b. Load client email (orders table has no client_email column; it lives on clients)
   let clientEmail: string | null = null;
