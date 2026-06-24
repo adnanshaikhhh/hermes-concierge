@@ -148,6 +148,13 @@ export default async function OrderDetailPage({
         </div>
       )}
 
+      {order.status === "failed" && (
+        <div className="rounded-lg border border-red-500/40 bg-red-500/10 p-6 text-sm text-red-300">
+          <p className="font-medium">Delivery didn't complete.</p>
+          <p className="mt-1 text-red-300/80">Our agent hit an error fulfilling this order. No further charge will be made — your payment is on record. Please retry your brief or contact support.</p>
+        </div>
+      )}
+
       {/* Revision */}
       {showRevision && (
         <div className="mb-8">
