@@ -22,7 +22,7 @@ export default async function LoginPage({
       <div className="rounded-xl border border-[#1e2d4a] bg-[#0e1420] p-8">
         <h1 className="mb-2 text-2xl font-bold text-[#f0f4ff]">Sign in</h1>
         <p className="mb-6 text-sm text-[#8b9dc3]">
-          We'll email you a magic link — no password needed.
+          We&apos;ll email you a magic link — no password needed.
         </p>
         <LoginForm redirectTo={redirectTo} />
         <p className="mt-6 border-t border-[#1e2d4a] pt-4 text-center text-xs text-[#4a5980]">

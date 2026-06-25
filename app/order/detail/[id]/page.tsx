@@ -150,7 +150,7 @@ export default async function OrderDetailPage({
 
       {order.status === "failed" && (
         <div className="rounded-lg border border-red-500/40 bg-red-500/10 p-6 text-sm text-red-300">
-          <p className="font-medium">Delivery didn't complete.</p>
+          <p className="font-medium">Delivery didn&apos;t complete.</p>
           <p className="mt-1 text-red-300/80">Our agent hit an error fulfilling this order. No further charge will be made — your payment is on record. Please retry your brief or contact support.</p>
         </div>
       )}
@@ -180,7 +180,7 @@ export default async function OrderDetailPage({
           </h3>
           <p className="mb-4 text-sm text-[#8b9dc3]">
             One free revision is included. Tell the agent what to change and
-            it'll redeliver.
+            it&apos;ll redeliver.
           </p>
           <RevisionForm orderId={order.id} />
         </div>

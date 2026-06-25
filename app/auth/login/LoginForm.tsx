@@ -25,8 +25,8 @@ export function LoginForm({ redirectTo }: { redirectTo: string }) {
       if (error) throw error;
       setSent(true);
       toast.success("Check your email for the magic link");
-    } catch (err: any) {
-      toast.error(err.message || "Failed to send link");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to send link");
     } finally {
       setLoading(false);
     }

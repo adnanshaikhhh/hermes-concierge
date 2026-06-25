@@ -27,8 +27,8 @@ export function RevisionForm({ orderId }: { orderId: string }) {
       if (!res.ok) throw new Error(data.error || "Failed");
       toast.success("Revision requested — agent is on it");
       router.refresh();
-    } catch (err: any) {
-      toast.error(err.message || "Failed");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed");
     } finally {
       setLoading(false);
     }

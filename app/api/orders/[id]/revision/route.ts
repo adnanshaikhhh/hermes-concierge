@@ -11,14 +11,14 @@ export async function POST(
 ) {
   const { id } = await params;
 
-  let payload: any;
+  let payload: unknown;
   try {
     payload = await req.json();
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const { revision_brief } = payload;
+  const { revision_brief } = payload as { revision_brief?: unknown };
 
   if (
     !revision_brief ||

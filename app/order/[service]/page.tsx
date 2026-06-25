@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { OrderForm } from "./OrderForm";
 import type { ServiceLite } from "@/lib/utils";
@@ -77,12 +78,12 @@ export default async function OrderPage({
         {/* Form */}
         <div className="lg:col-span-2">
           <div className="mb-6">
-            <a
+            <Link
               href="/"
               className="inline-flex items-center gap-1 text-xs text-[#4a5980] hover:text-[#8b9dc3]"
             >
               ← Back to services
-            </a>
+            </Link>
           </div>
           <h1 className="h2-heading mb-2 text-[#f0f4ff]">{serviceData.name}</h1>
           <p className="mb-8 text-sm leading-relaxed text-[#8b9dc3]">
@@ -100,12 +101,12 @@ export default async function OrderPage({
               <p className="mb-4 text-sm text-[#8b9dc3]">
                 Sign in to start your brief.
               </p>
-              <a
+              <Link
                 href={`/auth/login?redirect=/order/${service}`}
                 className="inline-flex items-center gap-2 rounded-lg bg-[#3b6fe8] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#4a7ef0]"
               >
                 Sign in to continue →
-              </a>
+              </Link>
             </div>
           ) : (
             <OrderForm

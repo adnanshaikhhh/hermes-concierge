@@ -56,9 +56,10 @@ export function OrderForm({
       } else {
         throw new Error("No checkout URL returned");
       }
-    } catch (err: any) {
-      setError(err.message || "Something went wrong");
-      toast.error(err.message || "Something went wrong");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Something went wrong";
+      setError(message);
+      toast.error(message);
       setLoading(false);
     }
   };
@@ -192,7 +193,7 @@ export function OrderForm({
       </button>
 
       <p className="text-center text-xs text-[#4a5980]">
-        You'll be redirected to Stripe Checkout. Payment secures your order;
+        You&apos;ll be redirected to Stripe Checkout. Payment secures your order;
         delivery starts the moment payment clears.
       </p>
     </form>

@@ -137,8 +137,14 @@ export async function fulfillOrder(orderId: string): Promise<FulfillResult> {
   }
 }
 
+type NotifyOrder = {
+  id: string;
+  title: string;
+  services: { name: string } | { name: string }[] | null;
+};
+
 async function notifyClient(
-  order: any,
+  order: NotifyOrder,
   clientEmail: string | null,
   content: string,
   isRevision: boolean
@@ -157,9 +163,10 @@ async function notifyClient(
   }
 
   const resend = new Resend(apiKey);
+  const serviceName = Array.isArray(order.services) ? order.services[0]?.name : order.services?.name;
   const subject = isRevision
     ? `✅ Your revision is ready — ${order.title}`
-    : `✅ Your ${order.services.name} is ready — ${order.title}`;
+    : `✅ Your ${serviceName ?? "delivery"} is ready — ${order.title}`;
 
   await resend.emails.send({
     from: process.env.FROM_EMAIL || "noreply@hermesconcierge.com",
@@ -170,7 +177,7 @@ async function notifyClient(
         <div style="font-size: 12px; color: #3B6FE8; font-weight: 600; letter-spacing: 0.1em; margin-bottom: 16px;">HERMES CONCIERGE</div>
         <h1 style="font-size: 24px; font-weight: 700; color: #F0F4FF; margin: 0 0 8px 0;">Your work is ready.</h1>
         <p style="color: #8B9DC3; margin: 0 0 24px 0;">Order: <strong style="color: #F0F4FF;">${order.title}</strong></p>
-        <p style="color: #8B9DC3; margin: 0 0 24px 0;">Service: ${order.services.name}</p>
+        <p style="color: #8B9DC3; margin: 0 0 24px 0;">Service: ${serviceName ?? "delivery"}</p>
         <div style="margin: 24px 0; padding: 20px; background: #0E1420; border-radius: 8px; border: 1px solid #1E2D4A;">
           <p style="font-size: 12px; color: #4A5980; margin: 0 0 12px 0; text-transform: uppercase; letter-spacing: 0.1em;">Preview</p>
           <p style="color: #F0F4FF; line-height: 1.6; margin: 0; font-size: 14px;">${content
