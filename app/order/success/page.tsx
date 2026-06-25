@@ -4,6 +4,13 @@ import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
+type OrderSuccess = {
+  id: string;
+  title: string;
+  status: string;
+  services: { name: string } | { name: string }[] | null;
+};
+
 export default async function OrderSuccessPage({
   searchParams,
 }: {
@@ -15,7 +22,7 @@ export default async function OrderSuccessPage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  let orderData: any = null;
+  let orderData: OrderSuccess | null = null;
   if (user && order) {
     const { data } = await supabase
       .from("orders")
@@ -23,8 +30,14 @@ export default async function OrderSuccessPage({
       .eq("id", order)
       .eq("client_id", user.id)
       .single();
-    orderData = data;
+    orderData = data as OrderSuccess | null;
   }
+
+  const serviceName = orderData
+    ? (Array.isArray(orderData.services)
+        ? orderData.services[0]?.name
+        : orderData.services?.name)
+    : undefined;
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-24 text-center">
@@ -39,7 +52,7 @@ export default async function OrderSuccessPage({
         <p className="mb-8 text-sm text-[#4a5980]">
           <span className="font-mono">{orderData.id.slice(0, 8)}</span>
           {" · "}
-          {orderData.services?.name} · {orderData.title}
+          {serviceName} · {orderData.title}
         </p>
       )}
       <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
