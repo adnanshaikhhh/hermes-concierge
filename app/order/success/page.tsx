@@ -79,7 +79,7 @@ export default async function OrderSuccessPage({
         </Link>
       </div>
       <p className="mt-10 text-xs text-[#4a5980]">
-        We'll email you the moment your work is ready. Average delivery time: 4–8 minutes.
+        We&apos;ll email you the moment your work is ready. Average delivery time: 4–8 minutes.
       </p>
     </div>
   );
