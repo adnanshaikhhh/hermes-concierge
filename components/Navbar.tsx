@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { LayoutDashboard, LogIn, LogOut } from "lucide-react";
+import { GalleryHorizontalEnd, LayoutDashboard, LogIn, LogOut } from "lucide-react";
 
 export async function Navbar() {
   const supabase = await createClient();
@@ -25,6 +25,13 @@ export async function Navbar() {
             className="hidden text-sm text-[#8b9dc3] hover:text-[#f0f4ff] sm:inline-block"
           >
             Services
+          </Link>
+          <Link
+            href="/gallery"
+            className="hidden items-center gap-1.5 text-sm text-[#8b9dc3] hover:text-[#f0f4ff] sm:inline-flex"
+          >
+            <GalleryHorizontalEnd className="h-4 w-4" />
+            Gallery
           </Link>
           {user ? (
             <>

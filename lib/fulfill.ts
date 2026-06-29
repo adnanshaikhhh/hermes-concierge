@@ -184,7 +184,7 @@ async function notifyClient(
             .replace(/[#*`]/g, "")
             .slice(0, 300)}…</p>
         </div>
-        <a href="${process.env.NEXT_PUBLIC_APP_URL}/order/${order.id}"
+        <a href="${process.env.NEXT_PUBLIC_APP_URL}/order/detail/${order.id}"
            style="display: inline-block; background: #3B6FE8; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; margin-top: 8px;">
           View Full Delivery →
         </a>

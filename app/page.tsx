@@ -80,40 +80,35 @@ export default async function Home() {
             Agents live · accepting orders now
           </div>
           <h1 className="display-heading mb-6 max-w-3xl text-4xl font-bold tracking-tight text-[#f0f4ff] sm:text-5xl md:text-6xl">
-            Your work,
+            The AI Agency
             <br />
             <span className="bg-gradient-to-r from-[#3b6fe8] via-[#8b5cf6] to-[#3b6fe8] bg-clip-text text-transparent">
-              done.
+              That Never Sleeps
             </span>
           </h1>
           <p className="mb-10 max-w-2xl text-lg leading-relaxed text-[#8b9dc3]">
-            AI-powered delivery for research, writing, and analysis. Pay once,
-            receive in minutes.{" "}
-            <span className="text-[#f0f4ff]">Zero humans required.</span>
-          </p>
-          <p className="mx-auto mt-4 max-w-xl text-balance text-base text-neutral-500">
-            Built for operators who would rather be doing the work than
-            coordinating the people who do the work.
+            Submit a brief. Pay once. Receive your deliverable —{" "}
+            <span className="text-[#f0f4ff]">no humans involved.</span>
           </p>
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <a
               href="#services"
-              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-[#3b6fe8] px-5 py-3 text-sm font-semibold text-white shadow-sm shadow-[#3b6fe8]/30 transition hover:bg-[#4a7ef0] hover:shadow-md hover:shadow-[#3b6fe8]/40 sm:w-auto"
+              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-[#7c3aed] px-5 py-3 text-sm font-semibold text-white shadow-sm shadow-[#7c3aed]/30 transition hover:bg-[#6d28d9] hover:shadow-md hover:shadow-[#7c3aed]/40 sm:w-auto"
             >
-              Start a brief →
+              Submit a Brief →
             </a>
             <a
-              href="/dashboard"
-              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-[#2a4080] bg-[#0e1420] px-5 py-3 text-sm font-semibold text-[#f0f4ff] transition hover:border-[#3b6fe8] hover:bg-[#141b2d] sm:w-auto"
+              href="#how-it-works"
+              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-[#2a4080] bg-[#0e1420] px-5 py-3 text-sm font-semibold text-[#f0f4ff] transition hover:border-[#7c3aed] hover:bg-[#141b2d] sm:w-auto"
             >
-              View dashboard
+              See How It Works
             </a>
           </div>
 
           <div className="mt-16 flex flex-wrap items-center gap-x-8 gap-y-2 text-xs text-[#4a5980]">
             <span>
               Powered by{" "}
-              <span className="font-semibold text-[#8b9dc3]">MiniMax M3</span>
+              <span className="font-semibold text-[#8b9dc3]">NVIDIA NIM</span>
             </span>
             <span>·</span>
             <span>
@@ -121,7 +116,9 @@ export default async function Home() {
               <span className="font-semibold text-[#8b9dc3]">Stripe</span>
             </span>
             <span>·</span>
-            <span>No account required to browse</span>
+            <span>
+              <span className="font-semibold text-[#8b9dc3]">Zero Human Delay</span>
+            </span>
           </div>
         </div>
         <div className="glow-line mx-auto max-w-5xl" />
@@ -155,7 +152,7 @@ export default async function Home() {
       </section>
 
       {/* How it works */}
-      <section className="mx-auto max-w-6xl px-6 py-20">
+      <section id="how-it-works" className="mx-auto max-w-6xl px-6 py-20">
         <div className="mb-10">
           <div className="mb-2 text-xs font-medium uppercase tracking-widest text-[#3b6fe8]">
             How it works
@@ -166,18 +163,18 @@ export default async function Home() {
           {[
             {
               n: "01",
-              t: "Write a brief",
-              d: "Pick a service, describe what you need in plain language. No template, no kickoff call.",
+              t: "Submit Your Brief",
+              d: "Describe what you need in plain language. No template, no kickoff call.",
             },
             {
               n: "02",
-              t: "Pay with Stripe",
-              d: "One transparent price. Stripe Checkout. Money-back if we don't deliver.",
+              t: "Instant Payment",
+              d: "Secure Stripe Checkout. One transparent price. Money-back if we don't deliver.",
             },
             {
               n: "03",
-              t: "Receive the work",
-              d: "An autonomous agent fulfills the brief. You get a notification when it's done. One free revision included.",
+              t: "AI Delivers",
+              d: "MiniMax M3 on NVIDIA NIM fulfills your request autonomously. You get notified when it's ready.",
             },
           ].map((s) => (
             <div
@@ -206,8 +203,7 @@ export default async function Home() {
             <span>Hermes Concierge · {new Date().getFullYear()}</span>
           </div>
           <div>
-            Built for operators who would rather be doing the work than
-            coordinating the people who do the work.
+            Built for Hermes × NVIDIA × Stripe Hackathon 2025
           </div>
         </div>
       </footer>

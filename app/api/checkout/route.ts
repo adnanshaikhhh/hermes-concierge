@@ -119,27 +119,32 @@ export async function POST(req: Request) {
     "http://localhost:3000";
 
   try {
-    const session = await stripe.checkout.sessions.create({
-      mode: "payment",
-      payment_method_types: ["card"],
-      line_items: [
-        {
-          price_data: {
-            currency: "usd",
-            product_data: {
-              name: service.name,
-              description: service.description,
+    const session = await stripe.checkout.sessions.create(
+      {
+        mode: "payment",
+        payment_method_types: ["card"],
+        line_items: [
+          {
+            price_data: {
+              currency: "usd",
+              product_data: {
+                name: service.name,
+                description: service.description,
+              },
+              unit_amount: service.price_cents,
             },
-            unit_amount: service.price_cents,
+            quantity: 1,
           },
-          quantity: 1,
-        },
-      ],
-      customer_email: user.email!,
-      metadata: { order_id: order.id, service_id: serviceId },
-      success_url: `${appUrl}/order/success?session_id={CHECKOUT_SESSION_ID}&order=${order.id}`,
-      cancel_url: `${appUrl}/order/${serviceId}?cancelled=1`,
-    });
+        ],
+        customer_email: user.email!,
+        metadata: { order_id: order.id, service_id: serviceId },
+        success_url: `${appUrl}/order/success?session_id={CHECKOUT_SESSION_ID}&order=${order.id}`,
+        cancel_url: `${appUrl}/order/${serviceId}?cancelled=1`,
+      },
+      {
+        idempotencyKey: `checkout-${order.id}`,
+      }
+    );
 
     await supabase
       .from("orders")
