@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { CheckCircle2, ArrowRight } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import LiveStatusStream from "@/components/LiveStatusStream";
 
 export const dynamic = "force-dynamic";
 
@@ -54,6 +55,11 @@ export default async function OrderSuccessPage({
           {" · "}
           {serviceName} · {orderData.title}
         </p>
+      )}
+      {orderData && (
+        <div className="mx-auto mb-8 max-w-md text-left">
+          <LiveStatusStream orderId={orderData.id} />
+        </div>
       )}
       <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
         {orderData ? (

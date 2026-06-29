@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import BriefQualityScorer from "@/components/BriefQualityScorer";
 
 const CATEGORIES = [
   { id: "research-brief", label: "Research Brief", price: 9 },
@@ -170,6 +171,9 @@ export default function SubmitPage() {
             />
             <div className={`mt-1 text-xs ${briefValid ? "text-[#4a5980]" : "text-[#ef4444]"}`}>
               {briefLen} / {MAX_BRIEF} {briefLen < MIN_BRIEF && `— minimum ${MIN_BRIEF} characters`}
+            </div>
+            <div className="mt-3">
+              <BriefQualityScorer brief={brief} />
             </div>
           </div>
 

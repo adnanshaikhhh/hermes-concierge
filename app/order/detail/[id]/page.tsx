@@ -4,6 +4,7 @@ import { OrderStatus } from "@/components/OrderStatus";
 import { DeliveryViewer } from "@/components/DeliveryViewer";
 import { RevisionForm } from "./RevisionForm";
 import { AutoRefresh } from "./AutoRefresh";
+import LiveStatusStream from "@/components/LiveStatusStream";
 import { formatDate, formatPrice } from "@/lib/utils";
 import Link from "next/link";
 import { ArrowLeft, Clock, Hash } from "lucide-react";
@@ -103,6 +104,13 @@ export default async function OrderDetailPage({
           />
         </div>
       </div>
+
+      {/* Live AI Status — only for in-progress orders */}
+      {isWorking && (
+        <div className="mb-8">
+          <LiveStatusStream orderId={order.id} />
+        </div>
+      )}
 
       {/* Brief */}
       <div className="mb-8 rounded-xl border border-[#1e2d4a] bg-[#0e1420] p-6">
