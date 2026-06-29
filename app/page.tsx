@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import type { ServiceLite } from "@/lib/utils";
 
@@ -52,9 +53,9 @@ const DEFAULT_SERVICES = [
 ];
 
 const STATS = [
-  { value: "4–8 min", label: "Avg delivery" },
-  { value: "< 2 min", label: "Brief to agent" },
-  { value: "Zero", label: "Human delay" },
+  { value: "∞", label: "AVAILABILITY" },
+  { value: "< 5min", label: "DELIVERY" },
+  { value: "100%", label: "AI POWERED" },
 ];
 
 export default async function Home() {
@@ -96,22 +97,21 @@ export default async function Home() {
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
             </span>
-            Agents live · accepting orders now
+            ⚡ Powered by MiniMax M3 · NVIDIA NIM
           </div>
 
           {/* Headline */}
-          <h1 className="mb-6 max-w-3xl text-5xl font-bold tracking-tight text-[#f0f4ff] sm:text-6xl lg:text-7xl">
-            The AI Agency
+          <h1 className="mb-8 max-w-4xl text-[48px] font-bold leading-[1.05] tracking-[-0.03em] text-[#fafafa] sm:text-[64px] lg:text-[80px]">
+            Your work,
             <br />
-            <span className="bg-gradient-to-r from-[#7c3aed] via-[#3b6fe8] to-[#06b6d4] bg-clip-text text-transparent">
-              That Never Sleeps
+            <span className="bg-gradient-to-r from-[#7c3aed] via-[#a855f7] to-[#7c3aed] bg-clip-text text-transparent">
+              done.
             </span>
           </h1>
 
           {/* Subheadline */}
-          <p className="mb-10 max-w-2xl text-lg leading-relaxed text-[#8b9dc3] sm:text-xl">
-            Submit a brief. Pay once. Receive your deliverable —{" "}
-            <span className="font-medium text-[#f0f4ff]">no humans involved.</span>
+          <p className="mb-10 max-w-[560px] text-base text-[#a1a1aa] sm:text-[20px]">
+            Submit a brief. Pay once. Your deliverable arrives in minutes — fulfilled by AI, zero humans involved.
           </p>
 
           {/* CTAs */}
@@ -122,12 +122,12 @@ export default async function Home() {
             >
               Submit a Brief →
             </a>
-            <a
-              href="#how-it-works"
-              className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-[#2a4080] bg-[#0e1420] px-6 py-3.5 text-sm font-semibold text-[#f0f4ff] transition hover:border-[#7c3aed]/50 hover:bg-[#141b2d] sm:w-auto"
+            <Link
+              href="/gallery"
+              className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-[#2a4080] bg-[#0e1420] px-6 py-3.5 text-sm font-semibold text-[#fafafa] transition hover:border-[#7c3aed]/50 hover:bg-[#141b2d] sm:w-auto"
             >
-              See How It Works
-            </a>
+              See Examples
+            </Link>
           </div>
 
           {/* Trust bar */}
@@ -149,17 +149,17 @@ export default async function Home() {
       </section>
 
       {/* ─── Stats ────────────────────────────────────────────── */}
-      <section className="mx-auto max-w-6xl px-6 pb-16">
-        <div className="grid grid-cols-3 gap-px overflow-hidden rounded-xl border border-[#1e2d4a] bg-[#1e2d4a]">
+      <section className="mx-auto max-w-6xl px-6 pb-20 pt-8">
+        <div className="grid grid-cols-3 divide-y divide-[#1f1f1f] rounded-2xl border border-[#1f1f1f] bg-[#111111] sm:divide-y-0 sm:divide-x">
           {STATS.map((s) => (
             <div
               key={s.label}
-              className="flex flex-col items-center bg-[#0a0a0a] px-4 py-6"
+              className="flex flex-col items-center px-4 py-8"
             >
-              <span className="text-2xl font-bold tracking-tight text-[#f0f4ff] sm:text-3xl">
+              <span className="font-mono text-3xl font-bold tracking-tight text-[#7c3aed] sm:text-4xl">
                 {s.value}
               </span>
-              <span className="mt-1 text-xs font-medium uppercase tracking-wider text-[#4a5980]">
+              <span className="mt-2 text-[11px] font-medium uppercase tracking-[0.18em] text-[#71717a]">
                 {s.label}
               </span>
             </div>
@@ -186,6 +186,51 @@ export default async function Home() {
           {services.map((s) => (
             <ServiceCardDisplay key={s.id} service={s} />
           ))}
+        </div>
+      </section>
+
+      {/* ─── Pricing ──────────────────────────────────────────── */}
+      <section id="pricing" className="mx-auto max-w-6xl px-6 py-20">
+        <div className="mb-12 text-center">
+          <div className="mb-2 text-xs font-medium uppercase tracking-widest text-[#7c3aed]">
+            Pricing
+          </div>
+          <h2 className="text-3xl font-bold tracking-tight text-[#fafafa] sm:text-4xl">
+            Simple, transparent pricing.
+          </h2>
+          <p className="mt-3 text-base text-[#a1a1aa]">
+            Three tiers. Pay once. No subscriptions.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <PricingCard
+            tier="BASIC"
+            price="$19"
+            desc="Quick Tasks"
+            bullet1="Copy, research, summaries"
+            bullet2="1 deliverable per brief"
+            bullet3="Up to 1,500 words"
+            bullet4="48-hour revision window"
+          />
+          <PricingCard
+            popular
+            tier="PRO"
+            price="$49"
+            desc="Deep Work"
+            bullet1="Analysis, strategy, reports"
+            bullet2="Up to 5,000 words"
+            bullet3="Includes data citations"
+            bullet4="Unlimited revisions (7 days)"
+          />
+          <PricingCard
+            tier="ENTERPRISE"
+            price="$99"
+            desc="Complex Projects"
+            bullet1="Full documents, code review"
+            bullet2="Up to 15,000 words"
+            bullet3="Multi-section deliverables"
+            bullet4="Priority queue · 30-day revisions"
+          />
         </div>
       </section>
 
@@ -272,16 +317,13 @@ export default async function Home() {
       </section>
 
       {/* ─── Footer ───────────────────────────────────────────── */}
-      <footer className="border-t border-[#1e2d4a]">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-6 py-8 text-xs text-[#4a5980] sm:flex-row">
+      <footer className="border-t border-[#1f1f1f]">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-center gap-2 px-6 py-8 text-center text-xs text-[#71717a]">
           <div className="flex items-center gap-2">
-            <div className="flex h-5 w-5 items-center justify-center rounded bg-gradient-to-br from-[#7c3aed] to-[#3b6fe8]">
-              <span className="text-[10px] font-bold text-white">H</span>
-            </div>
-            <span>Hermes Concierge · {new Date().getFullYear()}</span>
-          </div>
-          <div>
-            Built for Hermes × NVIDIA × Stripe Hackathon 2025
+            <span className="text-[#7c3aed]">⚡</span>
+            <span>
+              Built for Hermes × NVIDIA × Stripe Hackathon · Powered by MiniMax M3 · © {new Date().getFullYear()}
+            </span>
           </div>
         </div>
       </footer>
@@ -334,5 +376,76 @@ function ServiceCardDisplay({ service }: { service: ServiceLite & { icon?: strin
         </div>
       </div>
     </a>
+  );
+}
+
+function PricingCard({
+  tier,
+  price,
+  desc,
+  bullet1,
+  bullet2,
+  bullet3,
+  bullet4,
+  popular = false,
+}: {
+  tier: string;
+  price: string;
+  desc: string;
+  bullet1: string;
+  bullet2: string;
+  bullet3: string;
+  bullet4: string;
+  popular?: boolean;
+}) {
+  return (
+    <div
+      className={`relative rounded-2xl border p-6 transition duration-200 hover:-translate-y-1 ${
+        popular
+          ? "border-[#7c3aed]/50 bg-gradient-to-b from-[#1a0a2e]/60 to-[#111111] shadow-lg shadow-[#7c3aed]/10 hover:shadow-[#7c3aed]/20"
+          : "border-[#1f1f1f] bg-[#111111] hover:border-[#7c3aed]/30"
+      }`}
+    >
+      {popular && (
+        <span className="absolute -top-3 left-1/2 z-10 -translate-x-1/2 rounded-full bg-gradient-to-r from-[#7c3aed] to-[#6d28d9] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow-md">
+          Most Popular
+        </span>
+      )}
+      <div className="mb-1 text-[11px] font-bold uppercase tracking-[0.18em] text-[#71717a]">
+        {tier}
+      </div>
+      <div className="mb-1 text-4xl font-bold tracking-tight text-[#fafafa]">
+        {price}
+      </div>
+      <div className="mb-6 text-sm font-medium text-[#a1a1aa]">{desc}</div>
+      <ul className="mb-8 space-y-3 text-sm text-[#a1a1aa]">
+        {[bullet1, bullet2, bullet3, bullet4].map((b) => (
+          <li key={b} className="flex items-start gap-2">
+            <svg
+              className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#10b981]"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M16.7 5.3a1 1 0 0 1 0 1.4l-8 8a1 1 0 0 1-1.4 0l-4-4a1 1 0 0 1 1.4-1.4L8 12.6l7.3-7.3a1 1 0 0 1 1.4 0z"
+                clipRule="evenodd"
+              />
+            </svg>
+            <span>{b}</span>
+          </li>
+        ))}
+      </ul>
+      <Link
+        href="/submit"
+        className={`inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg text-sm font-semibold transition ${
+          popular
+            ? "bg-gradient-to-r from-[#7c3aed] to-[#6d28d9] text-white shadow-[0_0_20px_rgba(124,58,237,0.3)] hover:shadow-[0_0_30px_rgba(124,58,237,0.45)]"
+            : "border border-[#1f1f1f] bg-[#161616] text-[#fafafa] hover:border-[#7c3aed]/40"
+        }`}
+      >
+        Get Started →
+      </Link>
+    </div>
   );
 }
