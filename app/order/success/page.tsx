@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { CheckCircle2, ArrowRight } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import LiveStatusStream from "@/components/LiveStatusStream";
+import { OrderSidebar } from "./OrderSidebar";
+import TerminalStream from "@/components/TerminalStream";
+import { ArrowRight, Home } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -9,6 +10,9 @@ type OrderSuccess = {
   id: string;
   title: string;
   status: string;
+  amount_cents: number;
+  currency: string;
+  created_at: string;
   services: { name: string } | { name: string }[] | null;
 };
 
@@ -27,7 +31,9 @@ export default async function OrderSuccessPage({
   if (user && order) {
     const { data } = await supabase
       .from("orders")
-      .select("id, title, status, services(name)")
+      .select(
+        "id, title, status, amount_cents, currency, created_at, services(name)",
+      )
       .eq("id", order)
       .eq("client_id", user.id)
       .single();
@@ -41,52 +47,58 @@ export default async function OrderSuccessPage({
     : undefined;
 
   return (
-    <div className="mx-auto max-w-2xl px-6 py-24 text-center">
-      <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border-2 border-[#10b981] bg-[#10b981]/10">
-        <CheckCircle2 className="h-8 w-8 text-[#10b981]" />
-      </div>
-      <h1 className="h2-heading mb-3 text-[#f0f4ff]">Payment received.</h1>
-      <p className="mb-2 text-base text-[#8b9dc3]">
-        The agent is already working on your brief.
-      </p>
-      {orderData && (
-        <p className="mb-8 text-sm text-[#4a5980]">
-          <span className="font-mono">{orderData.id.slice(0, 8)}</span>
-          {" · "}
-          {serviceName} · {orderData.title}
-        </p>
-      )}
-      {orderData && (
-        <div className="mx-auto mb-8 max-w-md text-left">
-          <LiveStatusStream orderId={orderData.id} />
+    <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 fade-in">
+      {orderData ? (
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-5 lg:gap-8">
+          {/* ─── Left 40%: Order summary ───────────────────────── */}
+          <div className="lg:col-span-2">
+            <OrderSidebar
+              orderId={orderData.id}
+              title={orderData.title}
+              serviceName={serviceName}
+              amountCents={orderData.amount_cents}
+              currency={orderData.currency}
+              createdAt={orderData.created_at}
+            />
+          </div>
+
+          {/* ─── Right 60%: Live status stream ──────────────────── */}
+          <div className="lg:col-span-3">
+            <TerminalStream orderId={orderData.id} initiallyDone={orderData.status === "complete"} />
+          </div>
+        </div>
+      ) : (
+        <div className="mx-auto max-w-md py-24 text-center">
+          <p className="text-base text-[#a1a1aa]">
+            Order received. You can track progress from your{" "}
+            <Link
+              href="/dashboard"
+              className="font-medium text-[#7c3aed] underline underline-offset-2"
+            >
+              dashboard
+            </Link>
+            .
+          </p>
         </div>
       )}
-      <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-        {orderData ? (
+
+      {/* Bottom links */}
+      <div className="mx-auto mt-12 flex max-w-3xl flex-col items-center justify-center gap-3 sm:flex-row">
+        {orderData && (
           <Link
             href={`/order/detail/${orderData.id}`}
-            className="inline-flex items-center gap-2 rounded-md bg-[#3b6fe8] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#4a7ef0]"
+            className="inline-flex h-11 items-center gap-2 rounded-lg bg-gradient-to-r from-[#7c3aed] to-[#6d28d9] px-5 text-sm font-semibold text-white shadow-[0_0_20px_rgba(124,58,237,0.3)] transition hover:shadow-[0_0_30px_rgba(124,58,237,0.45)]"
           >
-            Watch delivery <ArrowRight className="h-4 w-4" />
-          </Link>
-        ) : (
-          <Link
-            href="/dashboard"
-            className="inline-flex items-center gap-2 rounded-md bg-[#3b6fe8] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#4a7ef0]"
-          >
-            Go to dashboard <ArrowRight className="h-4 w-4" />
+            View Full Order <ArrowRight className="h-4 w-4" />
           </Link>
         )}
         <Link
           href="/"
-          className="inline-flex items-center gap-2 rounded-md border border-[#2a4080] bg-[#0e1420] px-5 py-2.5 text-sm font-semibold text-[#f0f4ff] transition hover:border-[#3b6fe8]"
+          className="inline-flex h-11 items-center gap-2 rounded-lg border border-[#1f1f1f] bg-[#111111] px-5 text-sm font-medium text-[#a1a1aa] transition hover:border-[#7c3aed]/40 hover:text-[#fafafa]"
         >
-          Place another order
+          <Home className="h-4 w-4" /> Home
         </Link>
       </div>
-      <p className="mt-10 text-xs text-[#4a5980]">
-        We&apos;ll email you the moment your work is ready. Average delivery time: 4–8 minutes.
-      </p>
     </div>
   );
 }
