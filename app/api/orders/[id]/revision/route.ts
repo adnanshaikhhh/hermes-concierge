@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { after } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { fulfillOrder } from "@/lib/fulfill";
 import { ORDER_STATUS } from "@/lib/order-status";
@@ -86,8 +87,8 @@ export async function POST(
     );
   }
 
-  // Trigger fulfillment
-  fulfillOrder(id).catch((e) => console.error("Revision fulfill error:", e));
+  // Trigger fulfillment — keep alive past the response with after().
+  after(() => fulfillOrder(id).catch((e) => console.error("Revision fulfill error:", e)));
 
   return NextResponse.json({ ok: true });
 }

@@ -1,4 +1,5 @@
 import Stripe from "stripe";
+import { after } from "next/server";
 import { headers } from "next/headers";
 import { createServiceClient } from "@/lib/supabase/server";
 import { fulfillOrder } from "@/lib/fulfill";
@@ -48,8 +49,10 @@ export async function POST(req: Request) {
       })
       .eq("id", orderId);
 
-    // Trigger fulfillment — fire and forget; cron will pick up if this fails
-    fulfillOrder(orderId).catch((e) => console.error("Fulfill error:", e));
+    // Trigger fulfillment — fire and forget; cron will pick up if this fails.
+    // Use after() so the runtime keeps this promise alive after the 200
+    // response is sent (Vercel won't cut the function off under us).
+    after(() => fulfillOrder(orderId).catch((e) => console.error("Fulfill error:", e)));
 
     await supabase.from("agent_actions").insert({
       order_id: orderId,
