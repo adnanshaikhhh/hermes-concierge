@@ -88,8 +88,11 @@ export async function fulfillOrder(orderId: string): Promise<FulfillResult> {
 
     const userPrompt = `Deliver the ${order.services.name} as requested. Title: "${order.title}"${revisionNote}`;
 
-    // 4. Call LLM
-    const result = await callMiniMaxM3(systemPrompt, userPrompt);
+    // 4. Call LLM with tier-based token cap
+    // Enterprise tier (strategy-report) gets 8192 tokens, all others 4096.
+    const serviceId = order.service_id || "";
+    const maxTokens = serviceId === "strategy-report" ? 8192 : 4096;
+    const result = await callMiniMaxM3(systemPrompt, userPrompt, { maxTokens });
 
     // 5. Persist delivered content
     const updateData = isRevision
