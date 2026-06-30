@@ -165,14 +165,19 @@ async function notifyClient(
 ) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey || apiKey === "re_placeholder") {
-    console.log(
-      `[email-stub] Would send ${isRevision ? "revision" : "delivery"} for order ${order.id}`
+    // LOUD warning — never silent. Operators need to know delivery
+    // notifications aren't going out so they can wire Resend before
+    // launch.
+    console.warn(
+      `[email] ⚠️ NOT CONFIGURED — would send ${isRevision ? "revision" : "delivery"} for order ${order.id}. Set RESEND_API_KEY in Vercel (and verify FROM_EMAIL's domain in Resend before launch).`
     );
     return;
   }
 
   if (!clientEmail) {
-    console.log(`[email] no client email for order ${order.id}, skipping`);
+    console.warn(
+      `[email] no client email for order ${order.id} — skipping notification.`
+    );
     return;
   }
 
@@ -181,6 +186,12 @@ async function notifyClient(
   const subject = isRevision
     ? `✅ Your revision is ready — ${order.title}`
     : `✅ Your ${serviceName ?? "delivery"} is ready — ${order.title}`;
+
+  // Absolute app URL — fall back to Vercel production host so the email
+  // link is never a localhost or relative href.
+  const appUrl =
+    (process.env.NEXT_PUBLIC_APP_URL ?? "").replace(/\/$/, "") ||
+    "https://hermes-concierge-ten.vercel.app";
 
   await resend.emails.send({
     from: process.env.FROM_EMAIL || "noreply@hermesconcierge.com",
@@ -198,7 +209,7 @@ async function notifyClient(
             .replace(/[#*`]/g, "")
             .slice(0, 300)}…</p>
         </div>
-        <a href="${process.env.NEXT_PUBLIC_APP_URL}/order/detail/${order.id}"
+        <a href="${appUrl}/order/detail/${order.id}"
            style="display: inline-block; background: #3B6FE8; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; margin-top: 8px;">
           View Full Delivery →
         </a>
