@@ -2,6 +2,7 @@ import Stripe from "stripe";
 import { headers } from "next/headers";
 import { createServiceClient } from "@/lib/supabase/server";
 import { fulfillOrder } from "@/lib/fulfill";
+import { ORDER_STATUS } from "@/lib/order-status";
 
 export const dynamic = "force-dynamic";
 
@@ -42,7 +43,7 @@ export async function POST(req: Request) {
     await supabase
       .from("orders")
       .update({
-        status: "pending",
+        status: ORDER_STATUS.PENDING,
         stripe_payment_intent_id: (session.payment_intent as string) || null,
       })
       .eq("id", orderId);

@@ -1,8 +1,11 @@
 import { createServiceClient } from "./supabase/server";
 import { callMiniMaxM3 } from "./minimax";
 import { Resend } from "resend";
+import { ORDER_STATUS } from "./order-status";
 
-const ALLOWED_REVISION_STATUSES = new Set(["revision_requested"]);
+const ALLOWED_REVISION_STATUSES = new Set<string>([
+  ORDER_STATUS.REVISION_REQUESTED,
+]);
 
 export type FulfillResult = {
   success: boolean;
@@ -28,29 +31,35 @@ export async function fulfillOrder(orderId: string): Promise<FulfillResult> {
   }
 
   // Payment gate: never fulfill an initial order that has not been paid.
-  if (order.status === "pending" && !order.stripe_payment_intent_id) {
+  if (
+    order.status === ORDER_STATUS.PENDING &&
+    !order.stripe_payment_intent_id
+  ) {
     return { success: true, status: order.status };
   }
 
   // Idempotency: skip if not in a state that needs fulfillment
-  const isRevision = order.status === "revision_requested";
-  const isInitial = order.status === "pending";
+  const isRevision = order.status === ORDER_STATUS.REVISION_REQUESTED;
+  const isInitial = order.status === ORDER_STATUS.PENDING;
   if (!isInitial && !ALLOWED_REVISION_STATUSES.has(order.status)) {
     return { success: true, status: order.status };
   }
 
   // 2. Atomically claim the order so concurrent duplicate events can't double-fulfill
   if (isRevision) {
-    await supabase.from("orders").update({ status: "revision_processing" }).eq("id", orderId);
+    await supabase
+      .from("orders")
+      .update({ status: ORDER_STATUS.REVISION_PROCESSING })
+      .eq("id", orderId);
   } else {
     const { data: claimed } = await supabase
       .from("orders")
-      .update({ status: "processing" })
+      .update({ status: ORDER_STATUS.PROCESSING })
       .eq("id", orderId)
-      .eq("status", "pending")
+      .eq("status", ORDER_STATUS.PENDING)
       .select("id");
     if (!claimed || claimed.length === 0) {
-      return { success: true, status: "processing" }; // another worker already claimed it
+      return { success: true, status: ORDER_STATUS.PROCESSING }; // another worker already claimed it
     }
   }
 
@@ -85,14 +94,14 @@ export async function fulfillOrder(orderId: string): Promise<FulfillResult> {
     // 5. Persist delivered content
     const updateData = isRevision
       ? {
-          status: "revision_complete",
+          status: ORDER_STATUS.REVISION_COMPLETE,
           revision_content: result.content,
           revision_fulfilled_at: new Date().toISOString(),
           minimax_tokens_used:
             (order.minimax_tokens_used || 0) + result.tokensIn + result.tokensOut,
         }
       : {
-          status: "complete",
+          status: ORDER_STATUS.COMPLETE,
           fulfilled_content: result.content,
           fulfilled_at: new Date().toISOString(),
           minimax_tokens_used: result.tokensIn + result.tokensOut,
@@ -119,13 +128,18 @@ export async function fulfillOrder(orderId: string): Promise<FulfillResult> {
 
     return {
       success: true,
-      status: isRevision ? "revision_complete" : "complete",
+      status: isRevision
+        ? ORDER_STATUS.REVISION_COMPLETE
+        : ORDER_STATUS.COMPLETE,
       tokensIn: result.tokensIn,
       tokensOut: result.tokensOut,
     };
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Unknown error";
-    await supabase.from("orders").update({ status: "failed" }).eq("id", orderId);
+    await supabase
+      .from("orders")
+      .update({ status: ORDER_STATUS.FAILED })
+      .eq("id", orderId);
     await supabase.from("agent_actions").insert({
       order_id: orderId,
       action_type: isRevision ? "revision" : "fulfill",
@@ -133,7 +147,7 @@ export async function fulfillOrder(orderId: string): Promise<FulfillResult> {
       error_message: message,
       latency_ms: Date.now() - actionStart,
     });
-    return { success: false, status: "failed", error: message };
+    return { success: false, status: ORDER_STATUS.FAILED, error: message };
   }
 }
 

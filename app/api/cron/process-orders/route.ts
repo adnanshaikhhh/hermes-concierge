@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { createServiceClient } from "@/lib/supabase/server";
 import { fulfillOrder } from "@/lib/fulfill";
+import { ORDER_STATUS } from "@/lib/order-status";
 
 export const dynamic = "force-dynamic";
 
@@ -21,7 +22,7 @@ export async function GET(req: Request) {
   const { data: pending } = await supabase
     .from("orders")
     .select("id, status")
-    .or(`status.eq.pending,status.eq.revision_requested`)
+    .or(`status.eq.${ORDER_STATUS.PENDING},status.eq.${ORDER_STATUS.REVISION_REQUESTED}`)
     .lt("created_at", cutoff)
     .limit(10);
 

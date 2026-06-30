@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { ORDER_STATUS } from "@/lib/order-status";
 
 export const dynamic = "force-dynamic";
 
@@ -11,13 +12,26 @@ const STEPS = [
 
 type StepKey = (typeof STEPS)[number]["key"];
 
+// Map order status (canonical strings from lib/order-status.ts) to the
+// UI step keys. Previously we wrote "completed" here but the fulfill
+// pipeline writes "complete" — that mismatch is why the stream spun on
+// "Queued" forever and never advanced to "Delivered".
 const STATUS_TO_STEP: Record<string, StepKey> = {
-  pending: "queued",
-  processing: "generating",
-  reviewing: "reviewing",
-  completed: "delivered",
-  failed: "queued", // reset visual
+  [ORDER_STATUS.PENDING]: "queued",
+  [ORDER_STATUS.PROCESSING]: "generating",
+  "reviewing": "reviewing",
+  [ORDER_STATUS.COMPLETE]: "delivered",
+  [ORDER_STATUS.REVISION_REQUESTED]: "queued",
+  [ORDER_STATUS.REVISION_PROCESSING]: "generating",
+  [ORDER_STATUS.REVISION_COMPLETE]: "delivered",
+  [ORDER_STATUS.FAILED]: "queued", // reset visual
 };
+
+const TERMINAL_STATUSES = new Set<string>([
+  ORDER_STATUS.COMPLETE,
+  ORDER_STATUS.REVISION_COMPLETE,
+  ORDER_STATUS.FAILED,
+]);
 
 export async function GET(
   _req: Request,
@@ -60,7 +74,7 @@ export async function GET(
             });
 
             // Terminal state — close stream
-            if (order.status === "completed" || order.status === "failed") {
+            if (TERMINAL_STATUSES.has(order.status)) {
               send({ type: "done", status: order.status });
               break;
             }

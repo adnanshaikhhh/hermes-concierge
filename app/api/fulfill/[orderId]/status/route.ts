@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { TERMINAL_SUCCESS_STATUSES, TERMINAL_FAILURE_STATUSES } from "@/lib/order-status";
 
 export const dynamic = "force-dynamic";
 
@@ -24,5 +25,7 @@ export async function GET(
     type: "status",
     status: order.status,
     result_url: order.result_url ?? null,
+    isTerminalSuccess: TERMINAL_SUCCESS_STATUSES.includes(order.status as (typeof TERMINAL_SUCCESS_STATUSES)[number]),
+    isTerminalFailure: TERMINAL_FAILURE_STATUSES.includes(order.status as (typeof TERMINAL_FAILURE_STATUSES)[number]),
   });
 }

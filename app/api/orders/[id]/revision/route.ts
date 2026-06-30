@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { fulfillOrder } from "@/lib/fulfill";
+import { ORDER_STATUS } from "@/lib/order-status";
 
 const REVISION_MIN = 20;
 const REVISION_MAX = 2000;
@@ -53,7 +54,7 @@ export async function POST(
     return NextResponse.json({ error: "Order not found" }, { status: 404 });
   }
 
-  if (order.status !== "complete") {
+  if (order.status !== ORDER_STATUS.COMPLETE) {
     return NextResponse.json(
       { error: "Order must be complete before requesting a revision" },
       { status: 400 }
@@ -73,7 +74,7 @@ export async function POST(
     .update({
       revision_brief: revision_brief.trim(),
       revision_requested_at: new Date().toISOString(),
-      status: "revision_requested",
+      status: ORDER_STATUS.REVISION_REQUESTED,
     })
     .eq("id", id);
 

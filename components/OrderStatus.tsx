@@ -1,9 +1,12 @@
 "use client";
 
 import { cn, statusColor, statusLabel } from "@/lib/utils";
+import { IN_FLIGHT_STATUSES } from "@/lib/order-status";
 
 export function OrderStatus({ status }: { status: string }) {
-  const isLive = ["pending", "processing", "revision_requested", "revision_processing"].includes(status);
+  // Use the canonical enum so the badge reflects what the rest of the
+  // (post-fix) system considers in-flight vs terminal.
+  const isLive = (IN_FLIGHT_STATUSES as readonly string[]).includes(status);
   return (
     <span
       className={cn(

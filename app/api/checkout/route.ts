@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { stripe } from "@/lib/stripe";
+import { ORDER_STATUS } from "@/lib/order-status";
 import type { CheckoutPayload } from "@/lib/utils";
 
 const ALLOWED_SERVICES = new Set([
@@ -94,7 +95,7 @@ export async function POST(req: Request) {
       context: context?.trim() || null,
       special_instructions: specialInstructions?.trim() || null,
       amount_cents: service.price_cents,
-      status: "pending",
+      status: ORDER_STATUS.PENDING,
     })
     .select()
     .single();
