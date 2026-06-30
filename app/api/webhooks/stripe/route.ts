@@ -1,9 +1,10 @@
-import Stripe from "stripe";
 import { after } from "next/server";
 import { headers } from "next/headers";
+import { stripe } from "@/lib/stripe";
 import { createServiceClient } from "@/lib/supabase/server";
 import { fulfillOrder } from "@/lib/fulfill";
 import { ORDER_STATUS } from "@/lib/order-status";
+import type Stripe from "stripe";
 
 export const dynamic = "force-dynamic";
 
@@ -21,7 +22,6 @@ export async function POST(req: Request) {
     return new Response("Webhook secret not configured", { status: 500 });
   }
 
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "");
   let event: Stripe.Event;
 
   try {
