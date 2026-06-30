@@ -1,9 +1,14 @@
 // MiniMax M3 wrapper.
-// Primary: real MiniMax endpoint. Fallback: deterministic local fulfillment
-// so the product demos and works end-to-end even when the upstream key is missing.
+// Primary: NVIDIA NIM (OpenAI-compatible). Fallback: deterministic local
+// fulfillment so the product demos and works end-to-end even when the
+// upstream key is missing. The live call is now the default path.
 
-const PRIMARY_URL = "https://api.minimax.chat/v1/text/chatcompletion_v2";
-const FALLBACK_MODEL = "MiniMax-Text-01";
+const PRIMARY_URL =
+  process.env.NVIDIA_BASE_URL
+    ? `${process.env.NVIDIA_BASE_URL.replace(/\/$/, "")}/chat/completions`
+    : "https://integrate.api.nvidia.com/v1/chat/completions";
+const FALLBACK_MODEL = "local-fallback";
+const PRIMARY_MODEL = "minimaxai/minimax-m3";
 
 export type LlmResult = {
   content: string;
@@ -14,14 +19,23 @@ export type LlmResult = {
   usedFallback: boolean;
 };
 
+export type CallOptions = {
+  maxTokens?: number;
+};
+
 export async function callMiniMaxM3(
   systemPrompt: string,
-  userPrompt: string
+  userPrompt: string,
+  options: CallOptions = {}
 ): Promise<LlmResult> {
   const start = Date.now();
-  const apiKey = process.env.MINIMAX_API_KEY;
+  const apiKey =
+    process.env.NVIDIA_API_KEY || process.env.MINIMAX_API_KEY;
 
   if (!apiKey || apiKey === "placeholder") {
+    console.warn(
+      "[minimax] No NVIDIA_API_KEY / MINIMAX_API_KEY set — using local fallback. Set NVIDIA_API_KEY in Vercel to use real M3 inference."
+    );
     return localFulfill(systemPrompt, userPrompt, start);
   }
 
@@ -33,12 +47,12 @@ export async function callMiniMaxM3(
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "MiniMax-M3",
+        model: PRIMARY_MODEL,
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
         ],
-        max_tokens: 4096,
+        max_tokens: options.maxTokens ?? 4096,
         temperature: 0.7,
         top_p: 0.95,
       }),
@@ -46,23 +60,37 @@ export async function callMiniMaxM3(
 
     if (!response.ok) {
       const errText = await response.text();
-      console.error("MiniMax API error:", response.status, errText);
-      return localFulfill(systemPrompt, userPrompt, start);
+      console.error(
+        "[minimax] NVIDIA NIM error:",
+        response.status,
+        errText.slice(0, 500)
+      );
+      // Loud fallback — never silent. Operator should see this in Vercel logs.
+      return localFulfill(systemPrompt, userPrompt, start, {
+        upstreamStatus: response.status,
+        upstreamBody: errText.slice(0, 500),
+      });
     }
 
     const data = await response.json();
     const latencyMs = Date.now() - start;
     return {
       content: data.choices?.[0]?.message?.content ?? "",
-      tokensIn: data.usage?.prompt_tokens ?? estimateTokens(systemPrompt + userPrompt),
-      tokensOut: data.usage?.completion_tokens ?? estimateTokens(data.choices?.[0]?.message?.content ?? ""),
+      tokensIn:
+        data.usage?.prompt_tokens ??
+        estimateTokens(systemPrompt + userPrompt),
+      tokensOut:
+        data.usage?.completion_tokens ??
+        estimateTokens(data.choices?.[0]?.message?.content ?? ""),
       latencyMs,
-      model: "MiniMax-M3",
+      model: PRIMARY_MODEL,
       usedFallback: false,
     };
   } catch (err) {
-    console.error("MiniMax call failed:", err);
-    return localFulfill(systemPrompt, userPrompt, start);
+    console.error("[minimax] NVIDIA call threw:", err);
+    return localFulfill(systemPrompt, userPrompt, start, {
+      upstreamError: err instanceof Error ? err.message : String(err),
+    });
   }
 }
 
@@ -71,9 +99,30 @@ function estimateTokens(s: string) {
   return Math.max(1, Math.ceil(s.length / 4));
 }
 
-function localFulfill(system: string, user: string, start: number): LlmResult {
-  // Deterministic, high-quality fallback so the product works without an API key.
-  // Detects service type from system prompt and produces a polished, structured deliverable.
+function localFulfill(
+  system: string,
+  user: string,
+  start: number,
+  meta: {
+    upstreamStatus?: number;
+    upstreamBody?: string;
+    upstreamError?: string;
+  } = {}
+): LlmResult {
+  // Deterministic fallback — used only when the live NVIDIA NIM call is
+  // unavailable. Any upstream error is logged here so operators see
+  // exactly why it triggered (no silent templated responses).
+  if (meta.upstreamStatus || meta.upstreamError) {
+    console.error(
+      "[minimax] falling back to local template renderer:",
+      meta.upstreamError
+        ? { error: meta.upstreamError }
+        : {
+            status: meta.upstreamStatus,
+            body: meta.upstreamBody?.slice(0, 200),
+          }
+    );
+  }
   const isRevision = /REVISION/i.test(user);
   const revisionHint = isRevision
     ? `\n\n---\n\n## Revision Notes\n\nThis is a refined iteration. The original brief has been re-examined and the following adjustments were applied: improved structure, sharper recommendations, and updated supporting detail. The previous version is preserved in the order record for diffing.`
