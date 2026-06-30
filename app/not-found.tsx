@@ -1,12 +1,33 @@
 import Link from "next/link";
+import { Sparkles, ArrowLeft } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <div className="flex min-h-[70vh] flex-col items-center justify-center px-6 text-center">
-      <p className="text-sm font-medium text-[#3b6fe8]">404</p>
-      <h1 className="mt-2 text-2xl font-semibold text-[#f0f4ff]">Page not found</h1>
-      <p className="mt-2 max-w-sm text-sm text-[#9fb0d0]">That page doesn&apos;t exist. It may have moved, or the link is incorrect.</p>
-      <Link href="/" className="mt-6 rounded-md bg-[#3b6fe8] px-4 py-2 text-sm font-medium text-white">Back to home →</Link>
+    <div className="mx-auto flex min-h-[70vh] max-w-2xl flex-col items-center justify-center px-6 py-24 text-center">
+      <div className="font-mono text-[120px] font-bold leading-none tracking-tight text-[#7c3aed] sm:text-[160px]">
+        404
+      </div>
+      <h1 className="mb-3 mt-2 text-3xl font-bold tracking-tight text-[#fafafa] sm:text-4xl">
+        This brief doesn&apos;t exist yet.
+      </h1>
+      <p className="mb-10 max-w-md text-base text-[#a1a1aa]">
+        But yours could. Start something real — submit a brief and watch our AI
+        deliver in minutes.
+      </p>
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <Link
+          href="/submit"
+          className="inline-flex h-12 items-center gap-2 rounded-lg bg-gradient-to-r from-[#7c3aed] to-[#6d28d9] px-6 text-sm font-semibold text-white shadow-[0_0_20px_rgba(124,58,237,0.3)] transition hover:shadow-[0_0_30px_rgba(124,58,237,0.45)]"
+        >
+          <Sparkles className="h-4 w-4" /> Submit a Brief →
+        </Link>
+        <Link
+          href="/"
+          className="inline-flex h-12 items-center gap-2 rounded-lg border border-[#1f1f1f] bg-[#111111] px-6 text-sm font-medium text-[#a1a1aa] transition hover:border-[#7c3aed]/40 hover:text-[#fafafa]"
+        >
+          <ArrowLeft className="h-4 w-4" /> Back home
+        </Link>
+      </div>
     </div>
   );
 }

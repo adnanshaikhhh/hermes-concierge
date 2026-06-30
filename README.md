@@ -1,104 +1,160 @@
-# Hermes Concierge
+# ⚡ Hermes Concierge
 
-An AI-powered freelance agency that runs itself 24/7. Pay once, get a real deliverable in minutes. No retainer, no kickoff call, no waiting.
+> The AI agency that never sleeps.
 
-## Stack
+**[Live demo →](https://hermes-concierge-ten.vercel.app)**
+Built for **Hermes × NVIDIA × Stripe Hackathon** · Powered by **MiniMax M3** on **NVIDIA NIM**
 
-- **Next.js 16** (App Router, Turbopack) + **TypeScript** + **Tailwind CSS**
-- **shadcn/ui** + **@base-ui/react** primitives
-- **Supabase** (Postgres + Auth + RLS) for users, orders, and audit log
-- **Stripe** Checkout + Webhooks for real payments
-- **MiniMax M3** (MiniMax API) for fulfillment, with a deterministic fallback so the product demos and works even without an API key
-- **Resend** for transactional email (delivery notification)
-- **Vercel** for hosting, with a 2-minute cron that catches any orders the webhook missed
+---
 
-## Features
+## What is this?
 
-- 5 services: Research Brief, Copywriting, Data Analysis, Strategy Report, Competitor Analysis
-- Magic-link auth (no password)
-- Stripe Checkout with metadata-pinned order IDs
-- Server-side price enforcement (client can't tamper with prices)
-- Idempotent fulfillment (a webhook + cron race can't double-fulfill)
-- One free revision per order
-- Full audit trail (`agent_actions` table) for every LLM call, Stripe webhook, and fulfillment
-- Per-client RLS at the database level
+Hermes Concierge is a fully autonomous AI freelance agency. Clients submit a brief, pay via Stripe, and receive a professional deliverable — fulfilled entirely by **MiniMax M3** running on **NVIDIA NIM**. Zero humans involved at any stage.
 
-## Local setup
+## Demo the flow (30 seconds)
+
+1. Visit **`/`** → Submit a Brief → fill the form
+2. The real-time **Brief Quality Scorer** evaluates your brief on 4 dimensions
+3. Stripe Checkout opens → pay (test card `4242 4242 4242 4242`)
+4. Land on cinematic confirmation with terminal-style **Live Status Stream**
+5. Watch the AI queue → generate → deliver — typically 4–8 minutes
+6. Open `/dashboard` → `/order/[id]` → read the deliverable, copy or download
+
+## How it works (under the hood)
+
+```
+┌────────────┐    ┌─────────────┐    ┌──────────────┐     ┌──────────────────┐
+│ /submit    │───▶│ POST /api/  │───▶│ Stripe       │────▶│ /api/webhooks/   │
+│ brief form │    │ checkout    │    │ Checkout     │     │ stripe            │
+└────────────┘    └─────────────┘    └──────────────┘     └────────┬─────────┘
+                                                                 ▼
+              ┌──────────────────────────────────────────────┐  ┌─────────────────┐
+              │ - Brief Quality Scorer (real-time)           │  │ order created   │
+              │ - 3-tier pricing toggle                       │  │ → fulfill queue │
+              │ - Live status stream (SSE)                     │  └────────┬────────┘
+              │ - Terminal-style deliverable panel             │           │
+              └──────────────────────────────────────────────┘           ▼
+                                                           MiniMax M3 (NVIDIA NIM)
+                                                                            │
+                                                                            ▼
+                                                          ┌─────────────────────────────────┐
+                                                          │ /order/[id] — full deliverable  │
+                                                          │ /api/fulfill/[id]/stream (SSE)  │
+                                                          └─────────────────────────────────┘
+```
+
+1. Client submits a brief at `/submit`
+2. **BriefQualityScorer** scores the brief in real time (Specificity · Verifiability · Completeness · Structuredness)
+3. Client pays via Stripe Checkout
+4. Stripe webhook (`/api/webhooks/stripe` — `checkout.session.completed`) creates the order
+5. The fulfill pipeline triggers MiniMax M3 via NVIDIA NIM autonomously
+6. Client watches the **LiveStatusStream** (SSE) update in real-time
+7. Client downloads deliverable at `/order/[id]`
+
+## Tech stack
+
+| Layer          | Tech                                         |
+| -------------- | -------------------------------------------- |
+| Frontend       | Next.js 14 (App Router), TypeScript, Tailwind CSS v4 |
+| Database       | Supabase (PostgreSQL + RLS + pg_cron)        |
+| Payments       | Stripe (Checkout + Webhooks, idempotent)     |
+| AI             | MiniMax M3 via NVIDIA NIM                    |
+| Deployment     | Vercel                                       |
+| Agent          | Hermes (Nous Research)                       |
+| Streaming      | Server-Sent Events for live status           |
+
+## Key features
+
+- **BriefQualityScorer** — real-time 4-dimension quality scoring
+- **LiveStatusStream** — terminal-style real-time fulfillment UI
+- **Cinematic confirmation** — split layout with macOS-styled terminal
+- **/gallery** — sample deliverables, filterable by category
+- **Auto-refreshing dashboard** — orders table updates every 60s
+- **Revision flow** — free revision via `RevisionForm`
+- **Error boundaries** — `app/error.tsx` + reusable `ErrorBoundary` component
+- **Custom 404**, **SEO** metadata (OG + Twitter cards), **sitemap.xml**, **robots.txt**
+
+## Local development
 
 ```bash
-# 1. Install
+git clone https://github.com/adnanshaikhhh/hermes-concierge
+cd hermes-concierge
 npm install
-
-# 2. Configure environment
-cp .env.example .env.local
-# Fill in: Supabase URL + keys, Stripe keys, Resend, MiniMax API key
-
-# 3. Set up the database
-# In Supabase SQL Editor, run: supabase/migration.sql
-
-# 4. Start Stripe webhook listener (separate terminal)
-stripe listen --forward-to localhost:3000/api/webhooks/stripe
-
-# 5. Run
+cp .env.example .env.local       # fill in real values
 npm run dev
 ```
 
-## Environment variables
-
-| Variable | Description |
-|---|---|
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key (public) |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role (server only) |
-| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Stripe publishable key |
-| `STRIPE_SECRET_KEY` | Stripe secret key (server only) |
-| `STRIPE_WEBHOOK_SECRET` | From `stripe listen` or Stripe dashboard |
-| `MINIMAX_API_KEY` | MiniMax M3 API key (optional — fallback works without) |
-| `RESEND_API_KEY` | Resend API key (optional) |
-| `FROM_EMAIL` | Verified sender for Resend |
-| `NEXT_PUBLIC_APP_URL` | Full URL, e.g. `http://localhost:3000` |
-| `CRON_SECRET` | Random 32+ char string for cron auth |
-
-## Architecture
+Required env vars (see `.env.example`):
 
 ```
-Browser → /order/[service] (form)
-       → POST /api/checkout          (creates order + Stripe session)
-       → Stripe Checkout             (real payment)
-       → Stripe webhook              (verifies signature, marks order paid)
-       → lib/fulfill.ts              (calls MiniMax M3, stores result, emails client)
-       → /order/detail/[id]          (client views delivered work)
-       → POST /api/orders/[id]/revision (one free revision)
-
-Cron  */2 * * * *   → /api/cron/process-orders  (catches missed fulfillments)
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY
+SUPABASE_SERVICE_ROLE_KEY
+STRIPE_SECRET_KEY
+STRIPE_WEBHOOK_SECRET
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+STRIPE_PRICE_LOOKUP_ENABLED=true
+MINIMAX_API_BASE=https://integrate.api.nvidia.com/v1
+MINIMAX_API_KEY=nvapi-...
+MINIMAX_MODEL=minimaxai/minimax-m3
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
-## Security
+For Stripe webhooks locally:
 
-- All `/dashboard` and `/order/detail/*` routes require a valid Supabase session (enforced in `proxy.ts`)
-- Order access is gated by Supabase RLS (`client_id = auth.uid()`)
-- Stripe webhook signature is verified on every event
-- Cron endpoint requires `Authorization: Bearer $CRON_SECRET`
-- Prices are determined server-side from the `services` table — the client request body is validated against an allowlist
-- Input validation: brief 50–5000 chars, title 3–200, revision 20–2000
-- Rate limit: max 10 orders per client per hour
+```bash
+stripe listen --forward-to localhost:3000/api/webhooks/stripe
+```
 
-## Quality standards
+## Project structure
 
-- `npx tsc --noEmit` — zero errors
-- `npm run build` — production build passes
-- All 15 routes return correct status codes
-- Designed mobile-first at 375px
+```
+app/
+├── layout.tsx              ← root layout + metadata + fonts
+├── page.tsx                ← / (homepage)
+├── submit/page.tsx         ← /submit (brief form)
+├── gallery/page.tsx        ← /gallery (sample work)
+├── dashboard/              ← /dashboard (orders)
+├── order/
+│   ├── [service]/          ← per-service order form
+│   ├── success/            ← /order/success (confirmation + live stream)
+│   └── detail/[id]/        ← /order/[id] (deliverable + actions)
+├── api/
+│   ├── checkout/           ← Stripe Checkout session creation
+│   ├── webhooks/stripe/    ← Stripe webhook receiver (signed)
+│   ├── fulfill/
+│   │   ├── [orderId]/              ← manual fulfillment trigger
+│   │   ├── [orderId]/stream/       ← SSE live status
+│   │   └── [orderId]/status/       ← JSON status probe
+│   ├── orders/[id]/revision/       ← revision request
+│   ├── cron/process-orders/        ← fulfillment cron
+│   └── services/                   ← services catalog
+├── auth/                   ← /auth/* (login, callback)
+└── error.tsx, not-found.tsx, sitemap.ts, favicon.svg
 
-## API routes
+components/
+├── Navbar.tsx              ← sticky nav with mobile hamburger
+├── BriefQualityScorer.tsx  ← 4-dimension quality analyzer
+├── LiveStatusStream.tsx    ← SSE consumer + step indicator
+├── TerminalStream.tsx      ← cinematic terminal-style panel
+├── DeliveryViewer.tsx      ← markdown render + copy/download
+├── ErrorBoundary.tsx       ← reusable class-based boundary
+├── OrderStatus.tsx         ← status pill component
+└── Skeleton.tsx            ← shimmer skeletons
 
-| Method | Path | Purpose |
-|---|---|---|
-| POST | `/api/checkout` | Create Stripe Checkout Session + order |
-| POST | `/api/webhooks/stripe` | Stripe webhook handler |
-| GET  | `/api/cron/process-orders` | Cron-driven fulfillment safety net |
-| POST | `/api/orders/[id]/revision` | Submit a revision request |
-| POST | `/api/fulfill/[orderId]` | Manual fulfillment trigger (auth required) |
-| GET  | `/api/services` | List active services (with DB fallback) |
-| POST | `/api/auth/signout` | Sign out |
-| GET  | `/auth/callback` | Supabase auth callback |
+lib/
+├── stripe.ts               ← Stripe SDK bootstrap
+├── fulfill.ts              ← fulfillment pipeline (email + status)
+├── minimax.ts              ← MiniMax M3 / NVIDIA NIM client
+├── supabase/{server,client}.ts
+└── utils.ts
+```
+
+## Built by
+
+**[@adnanshaikhhh](https://github.com/adnanshaikhhh)** — solo builder, AI-assisted development.
+Built entirely using **Hermes Agent + MiniMax M3**.
+
+## License
+
+MIT — go build something ridiculous.
