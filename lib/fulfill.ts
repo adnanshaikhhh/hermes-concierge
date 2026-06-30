@@ -99,12 +99,14 @@ export async function fulfillOrder(orderId: string): Promise<FulfillResult> {
           revision_fulfilled_at: new Date().toISOString(),
           minimax_tokens_used:
             (order.minimax_tokens_used || 0) + result.tokensIn + result.tokensOut,
+          used_fallback: result.usedFallback,
         }
       : {
           status: ORDER_STATUS.COMPLETE,
           fulfilled_content: result.content,
           fulfilled_at: new Date().toISOString(),
           minimax_tokens_used: result.tokensIn + result.tokensOut,
+          used_fallback: result.usedFallback,
         };
 
     await supabase.from("orders").update(updateData).eq("id", orderId);

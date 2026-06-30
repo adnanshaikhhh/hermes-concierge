@@ -17,6 +17,15 @@ export async function GET(req: Request) {
 
   const supabase = createServiceClient();
 
+  // Expire abandoned unpaid orders older than 24h
+  const expiryCutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  await supabase
+    .from("orders")
+    .update({ status: ORDER_STATUS.FAILED })
+    .eq("status", ORDER_STATUS.PENDING)
+    .is("stripe_payment_intent_id", null)
+    .lt("created_at", expiryCutoff);
+
   // Find pending/revision_requested orders older than 30 seconds
   const cutoff = new Date(Date.now() - 30_000).toISOString();
   const { data: pending } = await supabase
